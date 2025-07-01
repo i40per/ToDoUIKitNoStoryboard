@@ -7,9 +7,13 @@
 
 import UIKit
 
+//MARK: - SceneDelegate
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
+    
+    //MARK: - Properties
     var window: UIWindow?
+    
+    //MARK: - UISceneDelegate
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
@@ -17,10 +21,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = ViewController() //Стартовый экран
+        window.rootViewController = TradingTasksViewController()
         self.window = window
         window.makeKeyAndVisible()
     }
 }
-
-
