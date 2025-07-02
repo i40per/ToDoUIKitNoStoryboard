@@ -12,6 +12,8 @@
 		951239122E11E0450043DBCD /* TradingTasksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 951239112E11E0450043DBCD /* TradingTasksViewController.swift */; };
 		951239172E11E0470043DBCD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 951239162E11E0470043DBCD /* Assets.xcassets */; };
 		9512391A2E11E0470043DBCD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 951239182E11E0470043DBCD /* LaunchScreen.storyboard */; };
+		953736902E157D79000F92CB /* TaskModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9537368F2E157D79000F92CB /* TaskModel.swift */; };
+		953736932E157F1E000F92CB /* TaskPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953736922E157F1E000F92CB /* TaskPresenter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,8 @@
 		951239162E11E0470043DBCD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		951239192E11E0470043DBCD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9512391B2E11E0470043DBCD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9537368F2E157D79000F92CB /* TaskModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskModel.swift; sourceTree = "<group>"; };
+		953736922E157F1E000F92CB /* TaskPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskPresenter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +98,7 @@
 		95261CCF2E12B38600FBD7F3 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				9537368F2E157D79000F92CB /* TaskModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -109,6 +114,7 @@
 		95261CD12E12B3A800FBD7F3 /* Presenter */ = {
 			isa = PBXGroup;
 			children = (
+				953736922E157F1E000F92CB /* TaskPresenter.swift */,
 			);
 			path = Presenter;
 			sourceTree = "<group>";
@@ -192,6 +198,8 @@
 			files = (
 				951239122E11E0450043DBCD /* TradingTasksViewController.swift in Sources */,
 				9512390E2E11E0450043DBCD /* AppDelegate.swift in Sources */,
+				953736902E157D79000F92CB /* TaskModel.swift in Sources */,
+				953736932E157F1E000F92CB /* TaskPresenter.swift in Sources */,
 				951239102E11E0450043DBCD /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

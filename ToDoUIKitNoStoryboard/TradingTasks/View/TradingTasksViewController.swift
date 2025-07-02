@@ -13,6 +13,9 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
     //MARK: - UI Elements
     private let tradingTasksTableView = UITableView()
     
+    // MARK: - Presenter
+    private let presenter = TaskPresenter()
+    
     //MARK: - Data
     private let TradingTasks = [
         "06:30 — Проснуться, выпить кофе",
@@ -29,6 +32,7 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
         title = "Trading Day Plan"
         view.backgroundColor = .systemBackground
         setupTradingTasksTableView()
+        presenter.delegate = self
     }
     
     //MARK: - Setup
@@ -51,21 +55,27 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
     
     //MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return TradingTasks.count
+        presenter.tasks.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TradingTaskCell", for: indexPath)
-        var config = cell.defaultContentConfiguration()
-        config.text = TradingTasks[indexPath.row]
-        config.textProperties.font = .systemFont(ofSize: 16, weight: .medium)
-        config.textProperties.color = .label
-        cell.contentConfiguration = config
+        let task = presenter.tasks[indexPath.row]
+        cell.textLabel?.text = task.title
+        cell.accessoryType = task.isCompleted ? .checkmark : .none
         return cell
     }
     
     //MARK: - UITableViewDelegate
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        presenter.toggleTask(at: indexPath.row)
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+// MARK: - Presenter
+extension TradingTasksViewController: TaskPresenterDelegate {
+    func tasksDidUpdate() {
+        tradingTasksTableView.reloadData()
     }
 }
