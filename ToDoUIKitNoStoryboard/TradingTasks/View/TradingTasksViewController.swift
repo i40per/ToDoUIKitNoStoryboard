@@ -7,44 +7,41 @@
 
 import UIKit
 
-//MARK: - TradingTasksViewController
+// MARK: - TradingTasksViewController
 class TradingTasksViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-    
-    //MARK: - UI Elements
+
+    // MARK: - UI
     private let tradingTasksTableView = UITableView()
-    
+
     // MARK: - Presenter
     private let presenter = TaskPresenter()
-    
-    //MARK: - Data
-    private let TradingTasks = [
-        "06:30 — Проснуться, выпить кофе",
-        "07:00 — Пройтись по утреннему обзору рынка",
-        "09:00 — Открытие Европы: мониторинг EUR/USD",
-        "12:00 — Разбор новостей на ForexFactory",
-        "16:30 — Волатильность NYSE: анализ S&P 500",
-        "20:00 — Подведение итогов, запись в журнал"
-    ]
-    
-    //MARK: - Lifecycle
+
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Trading Day Plan"
         view.backgroundColor = .systemBackground
+        setupNavigationBar()
         setupTradingTasksTableView()
         presenter.delegate = self
     }
-    
-    //MARK: - Setup
+
+    // MARK: - Setup UI
+    private func setupNavigationBar() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .add,
+            target: self,
+            action: #selector(addTaskButtonTapped)
+        )
+    }
+
     private func setupTradingTasksTableView() {
         view.addSubview(tradingTasksTableView)
-        
         tradingTasksTableView.translatesAutoresizingMaskIntoConstraints = false
         tradingTasksTableView.delegate = self
         tradingTasksTableView.dataSource = self
-        
         tradingTasksTableView.register(UITableViewCell.self, forCellReuseIdentifier: "TradingTaskCell")
-        
+
         NSLayoutConstraint.activate([
             tradingTasksTableView.topAnchor.constraint(equalTo: view.topAnchor),
             tradingTasksTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -52,8 +49,28 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
             tradingTasksTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    
-    //MARK: - UITableViewDataSource
+
+    // MARK: - Actions
+    @objc private func addTaskButtonTapped() {
+        let alert = UIAlertController(title: "Новая задача", message: "Введите текст задачи", preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.placeholder = "Например, «Проверить рынок»"
+        }
+
+        let addAction = UIAlertAction(title: "Добавить", style: .default) { [weak self] _ in
+            guard let taskText = alert.textFields?.first?.text, !taskText.isEmpty else { return }
+            self?.presenter.addTask(with: taskText)
+        }
+
+        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
+
+        alert.addAction(addAction)
+        alert.addAction(cancelAction)
+
+        present(alert, animated: true)
+    }
+
+    // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         presenter.tasks.count
     }
@@ -65,15 +82,15 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
         cell.accessoryType = task.isCompleted ? .checkmark : .none
         return cell
     }
-    
-    //MARK: - UITableViewDelegate
+
+    // MARK: - UITableViewDelegate
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         presenter.toggleTask(at: indexPath.row)
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
-// MARK: - Presenter
+// MARK: - TaskPresenterDelegate
 extension TradingTasksViewController: TaskPresenterDelegate {
     func tasksDidUpdate() {
         tradingTasksTableView.reloadData()

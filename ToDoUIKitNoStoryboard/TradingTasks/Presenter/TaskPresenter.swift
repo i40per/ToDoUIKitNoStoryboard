@@ -29,4 +29,10 @@ final class TaskPresenter {
         tasks[index].isCompleted.toggle()
         delegate?.tasksDidUpdate()
     }
+    
+    func addTask(with title: String) {
+        let newTask = TaskModel(title: title, isCompleted: false)
+        tasks.append(newTask)
+        delegate?.tasksDidUpdate() // чтобы view обновилась
+    }
 }
