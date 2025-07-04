@@ -35,4 +35,10 @@ final class TaskPresenter {
         tasks.append(newTask)
         delegate?.tasksDidUpdate() // чтобы view обновилась
     }
+    
+    func removeTask(at index: Int) {
+        guard tasks.indices.contains(index) else { return }
+        tasks.remove(at: index)
+        delegate?.tasksDidUpdate()
+    }
 }
