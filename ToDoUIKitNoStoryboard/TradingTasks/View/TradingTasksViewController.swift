@@ -23,6 +23,7 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
         view.backgroundColor = .systemBackground
         setupNavigationBar()
         setupTradingTasksTableView()
+        showFirstLaunchAlertIfNeeded()
         presenter.delegate = self
     }
 
@@ -48,6 +49,22 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
             tradingTasksTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tradingTasksTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    // MARK: - Alerts
+    private func showFirstLaunchAlertIfNeeded() {
+        if UserDefaults.isFirstLaunch {
+            let alert = UIAlertController(
+                title: "Добро пожаловать!",
+                message: "Это первый запуск приложения. Добавьте свои задачи на день, чтобы начать.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+            
+            //Сбрасываю флаг
+            UserDefaults.isFirstLaunch = false
+        }
     }
 
     // MARK: - Actions
@@ -108,5 +125,15 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
 extension TradingTasksViewController: TaskPresenterDelegate {
     func tasksDidUpdate() {
         tradingTasksTableView.reloadData()
+        
+        if presenter.tasks.isEmpty && !UserDefaults.isFirstLaunch {
+            let alert = UIAlertController(
+                title: "Нет задач",
+                message: "У вас пока нет задач. Нажмите +, чтобы добавить первую.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+        }
     }
 }

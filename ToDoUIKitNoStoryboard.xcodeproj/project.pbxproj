@@ -14,6 +14,7 @@
 		9512391A2E11E0470043DBCD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 951239182E11E0470043DBCD /* LaunchScreen.storyboard */; };
 		953736902E157D79000F92CB /* TaskModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9537368F2E157D79000F92CB /* TaskModel.swift */; };
 		953736932E157F1E000F92CB /* TaskPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953736922E157F1E000F92CB /* TaskPresenter.swift */; };
+		95FEDC7A2E19857800224416 /* UserDefaults+Launch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95FEDC792E19857800224416 /* UserDefaults+Launch.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		9512391B2E11E0470043DBCD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9537368F2E157D79000F92CB /* TaskModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskModel.swift; sourceTree = "<group>"; };
 		953736922E157F1E000F92CB /* TaskPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskPresenter.swift; sourceTree = "<group>"; };
+		95FEDC792E19857800224416 /* UserDefaults+Launch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+Launch.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +72,7 @@
 			children = (
 				9512390D2E11E0450043DBCD /* AppDelegate.swift */,
 				9512390F2E11E0450043DBCD /* SceneDelegate.swift */,
+				95FEDC782E19854700224416 /* Extensions */,
 				95261CCD2E12B2E400FBD7F3 /* Resources */,
 			);
 			path = App;
@@ -124,6 +127,14 @@
 			children = (
 			);
 			path = Shared;
+			sourceTree = "<group>";
+		};
+		95FEDC782E19854700224416 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				95FEDC792E19857800224416 /* UserDefaults+Launch.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -199,6 +210,7 @@
 				951239122E11E0450043DBCD /* TradingTasksViewController.swift in Sources */,
 				9512390E2E11E0450043DBCD /* AppDelegate.swift in Sources */,
 				953736902E157D79000F92CB /* TaskModel.swift in Sources */,
+				95FEDC7A2E19857800224416 /* UserDefaults+Launch.swift in Sources */,
 				953736932E157F1E000F92CB /* TaskPresenter.swift in Sources */,
 				951239102E11E0450043DBCD /* SceneDelegate.swift in Sources */,
 			);
