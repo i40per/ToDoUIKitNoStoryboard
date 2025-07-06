@@ -9,6 +9,6 @@ import Foundation
 
 // MARK: - TaskModel
 struct TaskModel: Codable {
-    let title: String
+    var title: String
     var isCompleted: Bool
 }

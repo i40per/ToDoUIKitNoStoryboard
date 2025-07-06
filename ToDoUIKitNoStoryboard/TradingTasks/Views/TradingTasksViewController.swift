@@ -8,7 +8,7 @@
 import UIKit
 
 // MARK: - TradingTasksViewController
-class TradingTasksViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class TradingTasksViewController: UIViewController {
 
     // MARK: - UI
     private let tradingTasksTableView = UITableView()
@@ -41,7 +41,12 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
         tradingTasksTableView.translatesAutoresizingMaskIntoConstraints = false
         tradingTasksTableView.delegate = self
         tradingTasksTableView.dataSource = self
-        tradingTasksTableView.register(UITableViewCell.self, forCellReuseIdentifier: "TradingTaskCell")
+        tradingTasksTableView.rowHeight = UITableView.automaticDimension
+        tradingTasksTableView.estimatedRowHeight = 60
+        tradingTasksTableView.register(TradingTaskCell.self, forCellReuseIdentifier: TradingTaskCell.identifier)
+
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        tradingTasksTableView.addGestureRecognizer(longPressGesture)
 
         NSLayoutConstraint.activate([
             tradingTasksTableView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -50,7 +55,7 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
             tradingTasksTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    
+
     // MARK: - Alerts
     private func showFirstLaunchAlertIfNeeded() {
         if UserDefaults.isFirstLaunch {
@@ -61,8 +66,6 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
             )
             alert.addAction(UIAlertAction(title: "OK", style: .default))
             present(alert, animated: true)
-            
-            //Сбрасываю флаг
             UserDefaults.isFirstLaunch = false
         }
     }
@@ -76,42 +79,67 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
 
         let addAction = UIAlertAction(title: "Добавить", style: .default) { [weak self] _ in
             guard let taskText = alert.textFields?.first?.text, !taskText.isEmpty else { return }
-            self?.presenter.addTask(with: taskText)
+            let cleaned = taskText.replacingOccurrences(of: #"^\d+\.\s"#, with: "", options: .regularExpression)
+            self?.presenter.addTask(with: cleaned)
         }
 
-        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
-
         alert.addAction(addAction)
-        alert.addAction(cancelAction)
-
+        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
         present(alert, animated: true)
     }
 
-    // MARK: - UITableViewDataSource
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else { return }
+
+        let location = gesture.location(in: tradingTasksTableView)
+        if let indexPath = tradingTasksTableView.indexPathForRow(at: location) {
+            let task = presenter.tasks[indexPath.row]
+
+            let editVC = EditTaskViewController()
+            editVC.configure(with: task.title)
+            editVC.onSave = { [weak self] newText in
+                self?.presenter.updateTask(at: indexPath.row, with: newText)
+            }
+
+            let navVC = UINavigationController(rootViewController: editVC)
+            present(navVC, animated: true)
+        }
+    }
+}
+
+// MARK: - UITableViewDataSource
+extension TradingTasksViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         presenter.tasks.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TradingTaskCell", for: indexPath)
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: TradingTaskCell.identifier,
+            for: indexPath
+        ) as? TradingTaskCell else {
+            return UITableViewCell()
+        }
+
         let task = presenter.tasks[indexPath.row]
-        cell.textLabel?.text = task.title
-        cell.accessoryType = task.isCompleted ? .checkmark : .none
+        cell.configure(with: task.title, index: indexPath.row)
         return cell
     }
+}
 
-    // MARK: - UITableViewDelegate
+// MARK: - UITableViewDelegate
+extension TradingTasksViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         presenter.toggleTask(at: indexPath.row)
         tableView.deselectRow(at: indexPath, animated: true)
     }
-    
+
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             presenter.removeTask(at: indexPath.row)
         }
     }
-    
+
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "Удалить") { [weak self] (_, _, completionHandler) in
             self?.presenter.removeTask(at: indexPath.row)
@@ -125,7 +153,7 @@ class TradingTasksViewController: UIViewController, UITableViewDataSource, UITab
 extension TradingTasksViewController: TaskPresenterDelegate {
     func tasksDidUpdate() {
         tradingTasksTableView.reloadData()
-        
+
         if presenter.tasks.isEmpty && !UserDefaults.isFirstLaunch {
             let alert = UIAlertController(
                 title: "Нет задач",

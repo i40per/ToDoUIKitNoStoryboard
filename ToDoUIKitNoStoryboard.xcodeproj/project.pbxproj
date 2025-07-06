@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		950E4BBF2E1A6C4A00913DE7 /* TradingTaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 950E4BBE2E1A6C4A00913DE7 /* TradingTaskCell.swift */; };
+		950E4BC12E1AB0C100913DE7 /* EditTaskViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 950E4BC02E1AB0C100913DE7 /* EditTaskViewController.swift */; };
 		9512390E2E11E0450043DBCD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9512390D2E11E0450043DBCD /* AppDelegate.swift */; };
 		951239102E11E0450043DBCD /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9512390F2E11E0450043DBCD /* SceneDelegate.swift */; };
 		951239122E11E0450043DBCD /* TradingTasksViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 951239112E11E0450043DBCD /* TradingTasksViewController.swift */; };
@@ -18,6 +20,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		950E4BBE2E1A6C4A00913DE7 /* TradingTaskCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingTaskCell.swift; sourceTree = "<group>"; };
+		950E4BC02E1AB0C100913DE7 /* EditTaskViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTaskViewController.swift; sourceTree = "<group>"; };
 		9512390A2E11E0450043DBCD /* ToDoUIKitNoStoryboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToDoUIKitNoStoryboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9512390D2E11E0450043DBCD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9512390F2E11E0450043DBCD /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -92,7 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				95261CCF2E12B38600FBD7F3 /* Model */,
-				95261CD02E12B39000FBD7F3 /* View */,
+				95261CD02E12B39000FBD7F3 /* Views */,
 				95261CD12E12B3A800FBD7F3 /* Presenter */,
 			);
 			path = TradingTasks;
@@ -106,12 +110,14 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
-		95261CD02E12B39000FBD7F3 /* View */ = {
+		95261CD02E12B39000FBD7F3 /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				951239112E11E0450043DBCD /* TradingTasksViewController.swift */,
+				950E4BBE2E1A6C4A00913DE7 /* TradingTaskCell.swift */,
+				950E4BC02E1AB0C100913DE7 /* EditTaskViewController.swift */,
 			);
-			path = View;
+			path = Views;
 			sourceTree = "<group>";
 		};
 		95261CD12E12B3A800FBD7F3 /* Presenter */ = {
@@ -212,7 +218,9 @@
 				953736902E157D79000F92CB /* TaskModel.swift in Sources */,
 				95FEDC7A2E19857800224416 /* UserDefaults+Launch.swift in Sources */,
 				953736932E157F1E000F92CB /* TaskPresenter.swift in Sources */,
+				950E4BBF2E1A6C4A00913DE7 /* TradingTaskCell.swift in Sources */,
 				951239102E11E0450043DBCD /* SceneDelegate.swift in Sources */,
+				950E4BC12E1AB0C100913DE7 /* EditTaskViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
