@@ -36,7 +36,7 @@ final class TradingTaskCell: UITableViewCell {
     }
 
     // MARK: - Configuration
-    func configure(with text: String, index: Int) {
+    func configure(with text: String, index: Int, isCompleted: Bool) {
         let numberPrefix = "\(index + 1). "
         let cleaned = text.replacingOccurrences(of: #"^\d+\.\s"#, with: "", options: .regularExpression)
         let fullText = numberPrefix + cleaned
@@ -46,12 +46,20 @@ final class TradingTaskCell: UITableViewCell {
         paragraph.headIndent = (numberPrefix as NSString).size(withAttributes: [.font: UIFont.systemFont(ofSize: 17)]).width
 
         let attributed = NSMutableAttributedString(string: fullText)
-        attributed.addAttributes([
-            .paragraphStyle: paragraph,
-            .font: UIFont.systemFont(ofSize: 17),
-            .foregroundColor: UIColor.label
-        ], range: NSRange(location: 0, length: attributed.length))
 
+        var attributes: [NSAttributedString.Key: Any] = [
+            .paragraphStyle: paragraph,
+            .font: UIFont.systemFont(ofSize: 17)
+        ]
+
+        if isCompleted {
+            attributes[.foregroundColor] = UIColor.secondaryLabel
+            attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+        } else {
+            attributes[.foregroundColor] = UIColor.label
+        }
+
+        attributed.addAttributes(attributes, range: NSRange(location: 0, length: attributed.length))
         taskLabel.attributedText = attributed
     }
 }

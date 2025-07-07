@@ -122,7 +122,7 @@ extension TradingTasksViewController: UITableViewDataSource {
         }
 
         let task = presenter.tasks[indexPath.row]
-        cell.configure(with: task.title, index: indexPath.row)
+        cell.configure(with: task.title, index: indexPath.row, isCompleted: task.isCompleted)
         return cell
     }
 }
