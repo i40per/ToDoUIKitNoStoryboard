@@ -60,11 +60,15 @@ class TradingTasksViewController: UIViewController {
     private func showFirstLaunchAlertIfNeeded() {
         if UserDefaults.isFirstLaunch {
             let alert = UIAlertController(
-                title: "Добро пожаловать!",
-                message: "Это первый запуск приложения. Добавьте свои задачи на день, чтобы начать.",
+                title: "Добро пожаловать 👋",
+                message: """
+                Это ваш список задач на трейдинг-день.
+
+                Нажмите «+», чтобы добавить свою первую задачу — например, утренний ритуал, анализ рынка или план на сессию.
+                """,
                 preferredStyle: .alert
             )
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            alert.addAction(UIAlertAction(title: "Поехали!", style: .default))
             present(alert, animated: true)
             UserDefaults.isFirstLaunch = false
         }
@@ -122,7 +126,7 @@ extension TradingTasksViewController: UITableViewDataSource {
         }
 
         let task = presenter.tasks[indexPath.row]
-        cell.configure(with: task.title, index: indexPath.row, isCompleted: task.isCompleted)
+        cell.configure(with: task.title, index: indexPath.row, status: task.status)
         return cell
     }
 }
@@ -151,8 +155,17 @@ extension TradingTasksViewController: UITableViewDelegate {
 
 // MARK: - TaskPresenterDelegate
 extension TradingTasksViewController: TaskPresenterDelegate {
-    func tasksDidUpdate() {
-        tradingTasksTableView.reloadData()
+    func taskDidChange(_ change: TaskChangeType) {
+        switch change {
+        case .added(let index):
+            tradingTasksTableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+        case .removed(let index):
+            tradingTasksTableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        case .updated(let index), .toggled(let index):
+            tradingTasksTableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        case .reloaded:
+            tradingTasksTableView.reloadData()
+        }
 
         if presenter.tasks.isEmpty && !UserDefaults.isFirstLaunch {
             let alert = UIAlertController(

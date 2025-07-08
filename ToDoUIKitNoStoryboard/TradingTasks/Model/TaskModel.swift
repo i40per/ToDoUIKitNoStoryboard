@@ -7,8 +7,14 @@
 
 import Foundation
 
+// MARK: - TaskStatus
+enum TaskStatus: String, Codable {
+    case active
+    case completed
+}
+
 // MARK: - TaskModel
 struct TaskModel: Codable {
     var title: String
-    var isCompleted: Bool
+    var status: TaskStatus
 }

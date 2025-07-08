@@ -7,9 +7,18 @@
 
 import Foundation
 
+// MARK: - Task Change Type
+enum TaskChangeType {
+    case added(index: Int)
+    case removed(index: Int)
+    case updated(index: Int)
+    case toggled(index: Int)
+    case reloaded
+}
+
 // MARK: - TaskPresenterDelegate
 protocol TaskPresenterDelegate: AnyObject {
-    func tasksDidUpdate()
+    func taskDidChange(_ change: TaskChangeType)
 }
 
 // MARK: - TaskPresenter
@@ -26,32 +35,36 @@ final class TaskPresenter {
 
     // MARK: - Task Management
     func toggleTask(at index: Int) {
-        tasks[index].isCompleted.toggle()
+        let task = tasks[index]
+
+        tasks[index].status = (task.status == .completed) ? .active : .completed
+
         saveTasks()
-        delegate?.tasksDidUpdate()
+        delegate?.taskDidChange(.toggled(index: index))
     }
 
     func addTask(with title: String) {
         let cleanedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        let newTask = TaskModel(title: cleanedTitle, isCompleted: false)
+        let newTask = TaskModel(title: cleanedTitle, status: .active)
         tasks.append(newTask)
         saveTasks()
-        delegate?.tasksDidUpdate()
+        delegate?.taskDidChange(.added(index: tasks.count - 1))
     }
 
     func removeTask(at index: Int) {
         guard tasks.indices.contains(index) else { return }
         tasks.remove(at: index)
         saveTasks()
-        delegate?.tasksDidUpdate()
+        delegate?.taskDidChange(.removed(index: index))
     }
 
     func updateTask(at index: Int, with newTitle: String) {
         guard tasks.indices.contains(index) else { return }
         let cleanedTitle = newTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard cleanedTitle != tasks[index].title else { return }
         tasks[index].title = cleanedTitle
         saveTasks()
-        delegate?.tasksDidUpdate()
+        delegate?.taskDidChange(.updated(index: index))
     }
 
     // MARK: - Persistence

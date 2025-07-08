@@ -36,7 +36,7 @@ final class TradingTaskCell: UITableViewCell {
     }
 
     // MARK: - Configuration
-    func configure(with text: String, index: Int, isCompleted: Bool) {
+    func configure(with text: String, index: Int, status: TaskStatus) {
         let numberPrefix = "\(index + 1). "
         let cleaned = text.replacingOccurrences(of: #"^\d+\.\s"#, with: "", options: .regularExpression)
         let fullText = numberPrefix + cleaned
@@ -52,10 +52,11 @@ final class TradingTaskCell: UITableViewCell {
             .font: UIFont.systemFont(ofSize: 17)
         ]
 
-        if isCompleted {
+        switch status {
+        case .completed:
             attributes[.foregroundColor] = UIColor.secondaryLabel
             attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
-        } else {
+        case .active:
             attributes[.foregroundColor] = UIColor.label
         }
 
