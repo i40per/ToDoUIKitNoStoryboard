@@ -9,58 +9,80 @@ import UIKit
 
 // MARK: - TradingTaskCell
 final class TradingTaskCell: UITableViewCell {
+
+    // MARK: - Identifier
     static let identifier = "TradingTaskCell"
 
-    private let taskLabel: UILabel = {
+    // MARK: - UI
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
-        label.font = UIFont.systemFont(ofSize: 17)
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .systemFont(ofSize: 17)
         return label
     }()
 
+    // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        contentView.addSubview(taskLabel)
-
-        NSLayoutConstraint.activate([
-            taskLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            taskLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            taskLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            taskLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
-        ])
+        setupLayout()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Configuration
-    func configure(with text: String, index: Int, status: TaskStatus) {
-        let numberPrefix = "\(index + 1). "
-        let cleaned = text.replacingOccurrences(of: #"^\d+\.\s"#, with: "", options: .regularExpression)
-        let fullText = numberPrefix + cleaned
-
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.firstLineHeadIndent = 0
-        paragraph.headIndent = (numberPrefix as NSString).size(withAttributes: [.font: UIFont.systemFont(ofSize: 17)]).width
-
-        let attributed = NSMutableAttributedString(string: fullText)
-
-        var attributes: [NSAttributedString.Key: Any] = [
-            .paragraphStyle: paragraph,
-            .font: UIFont.systemFont(ofSize: 17)
-        ]
+    // MARK: - Configure
+    func configure(with title: String, index: Int, status: TaskStatus) {
+        titleLabel.text = "\(index + 1). \(title)"
 
         switch status {
-        case .completed:
-            attributes[.foregroundColor] = UIColor.secondaryLabel
-            attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         case .active:
-            attributes[.foregroundColor] = UIColor.label
+            titleLabel.textColor = .label
+            titleLabel.attributedText = NSAttributedString(
+                string: titleLabel.text ?? "",
+                attributes: [.strikethroughStyle: 0]
+            )
+        case .completed:
+            titleLabel.textColor = .secondaryLabel
+            titleLabel.attributedText = NSAttributedString(
+                string: titleLabel.text ?? "",
+                attributes: [
+                    .strikethroughStyle: NSUnderlineStyle.single.rawValue,
+                    .foregroundColor: UIColor.secondaryLabel
+                ]
+            )
         }
+    }
 
-        attributed.addAttributes(attributes, range: NSRange(location: 0, length: attributed.length))
-        taskLabel.attributedText = attributed
+    // MARK: - Layout
+    private func setupLayout() {
+        contentView.addSubview(titleLabel)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            titleLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
+        ])
+    }
+    
+    // MARK: - Animation
+    func animateCompletionChange(isCompleted: Bool, index: Int, title: String) {
+        let highlightAlpha: CGFloat = isCompleted ? 0.3 : 1.0
+
+        configure(with: title, index: index, status: isCompleted ? .completed : .active)
+
+        UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseInOut]) {
+            self.contentView.alpha = highlightAlpha
+        } completion: { _ in
+            
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+
+            UIView.animate(withDuration: 0.25) {
+                self.contentView.alpha = 1.0
+            }
+        }
     }
 }

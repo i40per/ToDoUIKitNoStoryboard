@@ -9,9 +9,45 @@ import UIKit
 
 // MARK: - TradingTasksViewController
 class TradingTasksViewController: UIViewController {
+    
+    // MARK: - Title Components
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Trading Day Plan"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        label.textColor = .label
+        label.textAlignment = .center
+        return label
+    }()
+
+    private let dateLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+        label.textColor = .secondaryLabel
+        label.textAlignment = .center
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "EEEE, d MMMM"
+        let date = formatter.string(from: Date()).capitalized
+        label.text = date
+
+        return label
+    }()
+
+    
+    private func setupTitleView() {
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, dateLabel])
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.spacing = 2
+
+        navigationItem.titleView = stackView
+    }
 
     // MARK: - UI
     private let tradingTasksTableView = UITableView()
+    private var lastTapInfo: (indexPath: IndexPath, time: Date)?
 
     // MARK: - Presenter
     private let presenter = TaskPresenter()
@@ -19,9 +55,9 @@ class TradingTasksViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Trading Day Plan"
         view.backgroundColor = .systemBackground
         setupNavigationBar()
+        setupTitleView()
         setupTradingTasksTableView()
         showFirstLaunchAlertIfNeeded()
         presenter.delegate = self
@@ -41,12 +77,12 @@ class TradingTasksViewController: UIViewController {
         tradingTasksTableView.translatesAutoresizingMaskIntoConstraints = false
         tradingTasksTableView.delegate = self
         tradingTasksTableView.dataSource = self
+        tradingTasksTableView.dragDelegate = self
+        tradingTasksTableView.dropDelegate = self
+        tradingTasksTableView.dragInteractionEnabled = true
         tradingTasksTableView.rowHeight = UITableView.automaticDimension
         tradingTasksTableView.estimatedRowHeight = 60
         tradingTasksTableView.register(TradingTaskCell.self, forCellReuseIdentifier: TradingTaskCell.identifier)
-
-        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
-        tradingTasksTableView.addGestureRecognizer(longPressGesture)
 
         NSLayoutConstraint.activate([
             tradingTasksTableView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -64,7 +100,9 @@ class TradingTasksViewController: UIViewController {
                 message: """
                 Это ваш список задач на трейдинг-день.
 
-                Нажмите «+», чтобы добавить свою первую задачу — например, утренний ритуал, анализ рынка или план на сессию.
+                Одинарный тап — редактировать задачу.
+                Двойной тап — отметить как выполненную.
+                Долгий тап — изменить порядок задач.
                 """,
                 preferredStyle: .alert
             )
@@ -82,9 +120,11 @@ class TradingTasksViewController: UIViewController {
         }
 
         let addAction = UIAlertAction(title: "Добавить", style: .default) { [weak self] _ in
-            guard let taskText = alert.textFields?.first?.text, !taskText.isEmpty else { return }
-            let cleaned = taskText.replacingOccurrences(of: #"^\d+\.\s"#, with: "", options: .regularExpression)
-            self?.presenter.addTask(with: cleaned)
+            guard let taskText = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !taskText.isEmpty else { return }
+
+            let cleanedText = taskText.replacingOccurrences(of: #"^\d+\.\s"#, with: "", options: .regularExpression)
+            self?.presenter.addTask(with: cleanedText)
         }
 
         alert.addAction(addAction)
@@ -92,22 +132,21 @@ class TradingTasksViewController: UIViewController {
         present(alert, animated: true)
     }
 
-    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
-        guard gesture.state == .began else { return }
+    private func handleSingleTap(at indexPath: IndexPath) {
+        let task = presenter.tasks[indexPath.row]
 
-        let location = gesture.location(in: tradingTasksTableView)
-        if let indexPath = tradingTasksTableView.indexPathForRow(at: location) {
-            let task = presenter.tasks[indexPath.row]
-
-            let editVC = EditTaskViewController()
-            editVC.configure(with: task.title)
-            editVC.onSave = { [weak self] newText in
-                self?.presenter.updateTask(at: indexPath.row, with: newText)
-            }
-
-            let navVC = UINavigationController(rootViewController: editVC)
-            present(navVC, animated: true)
+        let editVC = EditTaskViewController()
+        editVC.configure(with: task.title)
+        editVC.onSave = { [weak self] newText in
+            self?.presenter.updateTask(at: indexPath.row, with: newText)
         }
+
+        let navVC = UINavigationController(rootViewController: editVC)
+        present(navVC, animated: true)
+    }
+
+    private func handleDoubleTap(at indexPath: IndexPath) {
+        presenter.toggleTask(at: indexPath.row)
     }
 }
 
@@ -134,7 +173,33 @@ extension TradingTasksViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension TradingTasksViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        presenter.toggleTask(at: indexPath.row)
+        let tapTime = Date()
+        let currentTapInfo = (indexPath: indexPath, time: tapTime)
+
+        if let last = lastTapInfo,
+           last.indexPath == indexPath,
+           tapTime.timeIntervalSince(last.time) < 0.4 {
+
+            handleDoubleTap(at: indexPath)
+            lastTapInfo = nil
+
+        } else {
+            lastTapInfo = currentTapInfo
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { [weak self] in
+                guard let self = self else { return }
+
+                // ВАЖНО: используем сохранённый tapInfo
+                if let last = self.lastTapInfo,
+                   last.indexPath == currentTapInfo.indexPath,
+                   last.time == currentTapInfo.time {
+
+                    self.handleSingleTap(at: indexPath)
+                    self.lastTapInfo = nil
+                }
+            }
+        }
+
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
@@ -153,18 +218,63 @@ extension TradingTasksViewController: UITableViewDelegate {
     }
 }
 
+// MARK: - UITableViewDragDelegate & UITableViewDropDelegate
+extension TradingTasksViewController: UITableViewDragDelegate, UITableViewDropDelegate {
+    func tableView(_ tableView: UITableView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        let task = presenter.tasks[indexPath.row]
+        let itemProvider = NSItemProvider(object: task.title as NSString)
+        let dragItem = UIDragItem(itemProvider: itemProvider)
+        dragItem.localObject = indexPath
+        return [dragItem]
+    }
+
+    func tableView(_ tableView: UITableView, performDropWith coordinator: UITableViewDropCoordinator) {
+        guard let destinationIndexPath = coordinator.destinationIndexPath else { return }
+
+        coordinator.items.forEach { dropItem in
+            if let sourceIndexPath = dropItem.dragItem.localObject as? IndexPath {
+                presenter.moveTask(from: sourceIndexPath.row, to: destinationIndexPath.row)
+                tableView.moveRow(at: sourceIndexPath, to: destinationIndexPath)
+            }
+        }
+    }
+
+    func tableView(_ tableView: UITableView, canHandle session: UIDropSession) -> Bool {
+        return session.localDragSession != nil
+    }
+
+    func tableView(_ tableView: UITableView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UITableViewDropProposal {
+        return UITableViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
+    }
+}
+
 // MARK: - TaskPresenterDelegate
 extension TradingTasksViewController: TaskPresenterDelegate {
     func taskDidChange(_ change: TaskChangeType) {
         switch change {
         case .added(let index):
             tradingTasksTableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .fade)
-        case .removed(let index):
-            tradingTasksTableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        case .updated(let index), .toggled(let index):
-            tradingTasksTableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-        case .reloaded:
+
+        case .removed, .reloaded:
             tradingTasksTableView.reloadData()
+
+        case .updated(let index):
+            tradingTasksTableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+
+        case .toggled(let index):
+            let indexPath = IndexPath(row: index, section: 0)
+
+            guard let cell = tradingTasksTableView.cellForRow(at: indexPath) as? TradingTaskCell else {
+                tradingTasksTableView.reloadRows(at: [indexPath], with: .fade)
+                return
+            }
+
+            let task = presenter.tasks[index]
+            cell.animateCompletionChange(
+                isCompleted: task.status == .completed,
+                index: index,
+                title: task.title
+            )
         }
 
         if presenter.tasks.isEmpty && !UserDefaults.isFirstLaunch {

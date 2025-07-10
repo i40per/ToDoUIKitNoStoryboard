@@ -10,36 +10,27 @@ import UIKit
 // MARK: - EditTaskViewController
 final class EditTaskViewController: UIViewController {
 
-    // MARK: - Public Properties
+    // MARK: - Properties
     var onSave: ((String) -> Void)?
+    private var originalText: String?
 
     // MARK: - UI
-    private let textView: UITextView = {
-        let tv = UITextView()
-        tv.font = UIFont.systemFont(ofSize: 16)
-        tv.layer.cornerRadius = 8
-        tv.layer.borderColor = UIColor.systemGray4.cgColor
-        tv.layer.borderWidth = 1
-        tv.translatesAutoresizingMaskIntoConstraints = false
-        tv.textContainerInset.top = 0
-        return tv
+    private let textField: UITextField = {
+        let textField = UITextField()
+        textField.placeholder = "Измените текст задачи"
+        textField.borderStyle = .roundedRect
+        textField.clearButtonMode = .whileEditing
+        return textField
     }()
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = "Редактирование"
         view.backgroundColor = .systemBackground
-        title = "Редактировать задачу"
-        
         setupNavigationBar()
         setupLayout()
-    }
-    
-    // MARK: - View Lifecycle
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        textView.becomeFirstResponder()
-        moveCursorToEnd()
+        textField.becomeFirstResponder()
     }
 
     // MARK: - Setup
@@ -51,41 +42,40 @@ final class EditTaskViewController: UIViewController {
             action: #selector(saveButtonTapped)
         )
         navigationItem.leftBarButtonItem = UIBarButtonItem(
-            title: "Отмена",
-            style: .plain,
+            barButtonSystemItem: .cancel,
             target: self,
             action: #selector(cancelButtonTapped)
         )
     }
 
     private func setupLayout() {
-        view.addSubview(textView)
+        view.addSubview(textField)
+        textField.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            textView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            textView.heightAnchor.constraint(equalToConstant: 200)
+            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            textField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            textField.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
-    
-    // MARK: - Public Methods
+
+    // MARK: - Configure
     func configure(with text: String) {
-        textView.text = text
-    }
-    
-    // MARK: - Private Methods
-    private func moveCursorToEnd() {
-        let endPosition = textView.endOfDocument
-        textView.selectedTextRange = textView.textRange(from: endPosition, to: endPosition)
+        originalText = text
+        textField.text = text
     }
 
     // MARK: - Actions
     @objc private func saveButtonTapped() {
-        let trimmed = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        let cleaned = trimmed.replacingOccurrences(of: #"^\d+\.\s"#, with: "", options: .regularExpression)
-        guard !cleaned.isEmpty else { return }
-        onSave?(cleaned)
+        guard let newText = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !newText.isEmpty,
+              newText != originalText else {
+            dismiss(animated: true)
+            return
+        }
+
+        onSave?(newText)
         dismiss(animated: true)
     }
 

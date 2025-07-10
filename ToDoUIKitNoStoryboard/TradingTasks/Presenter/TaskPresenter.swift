@@ -36,15 +36,14 @@ final class TaskPresenter {
     // MARK: - Task Management
     func toggleTask(at index: Int) {
         let task = tasks[index]
-
         tasks[index].status = (task.status == .completed) ? .active : .completed
-
         saveTasks()
         delegate?.taskDidChange(.toggled(index: index))
     }
 
     func addTask(with title: String) {
         let cleanedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedTitle.isEmpty else { return }
         let newTask = TaskModel(title: cleanedTitle, status: .active)
         tasks.append(newTask)
         saveTasks()
@@ -65,6 +64,18 @@ final class TaskPresenter {
         tasks[index].title = cleanedTitle
         saveTasks()
         delegate?.taskDidChange(.updated(index: index))
+    }
+
+    // MARK: - Move Task
+    func moveTask(from sourceIndex: Int, to destinationIndex: Int) {
+        guard sourceIndex != destinationIndex,
+              sourceIndex >= 0, sourceIndex < tasks.count,
+              destinationIndex >= 0, destinationIndex <= tasks.count else { return }
+
+        let movedTask = tasks.remove(at: sourceIndex)
+        tasks.insert(movedTask, at: destinationIndex)
+        saveTasks()
+        delegate?.taskDidChange(.reloaded)
     }
 
     // MARK: - Persistence
