@@ -70,6 +70,13 @@ class TradingTasksViewController: UIViewController {
             target: self,
             action: #selector(addTaskButtonTapped)
         )
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+                image: UIImage(systemName: "trash"),
+                style: .plain,
+                target: self,
+                action: #selector(deleteAllTasksButtonTapped)
+            )
     }
 
     private func setupTradingTasksTableView() {
@@ -129,6 +136,25 @@ class TradingTasksViewController: UIViewController {
 
         alert.addAction(addAction)
         alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
+        present(alert, animated: true)
+    }
+    
+    @objc private func deleteAllTasksButtonTapped() {
+        let alert = UIAlertController(
+            title: "Удалить все задачи?",
+            message: "Вы действительно хотите удалить все задачи?\nЭто действие нельзя будет отменить.",
+            preferredStyle: .alert
+        )
+
+        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+            self?.presenter.removeAllTasks()
+        }
+
+        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
+
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+
         present(alert, animated: true)
     }
 

@@ -56,6 +56,12 @@ final class TaskPresenter {
         saveTasks()
         delegate?.taskDidChange(.removed(index: index))
     }
+    
+    func removeAllTasks() {
+        tasks.removeAll()
+        saveTasks()
+        delegate?.taskDidChange(.reloaded)
+    }
 
     func updateTask(at index: Int, with newTitle: String) {
         guard tasks.indices.contains(index) else { return }
